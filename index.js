@@ -48,8 +48,6 @@ let lastId = 3;
 app.use(bodyParser.json()); //Necessary to parse incoming JSON response
 app.use(bodyParser.urlencoded({ extended: true }));
 
-//Write your code here//
-
 //ENDPOINT 1: GET All posts
 app.get("/posts", (req, res) => {
   res.json(posts);

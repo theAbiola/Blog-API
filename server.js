@@ -23,14 +23,15 @@ app.get("/", async (req, res) => {
   }
 });
 
-// Route to render the edit page
+// Route to render the new post page
 app.get("/new", (req, res) => {
   res.render("modify.ejs", { heading: "New Post", submit: "Create Post" });
 });
 
+// Route to render the edit page
 app.get("/edit/:id", async (req, res) => {
   try {
-    const response = await axios.get(`${API_URL}/posts/${req.params.id}`);
+    const response = await axios.get(`${API_URL}/posts/${req.params.id}`); //this req.params.id is coming from the ejs side. It is the endpoint that the user hits up from the form.
     console.log(response.data);
     res.render("modify.ejs", {
       heading: "Edit Post",
