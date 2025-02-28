@@ -1,16 +1,14 @@
 import express from "express";
-import bodyParser from "body-parser";
-import axios from "axios";
 import env from "dotenv";
 
 const app = express();
 env.config();
+
 const port = process.env.APPLICATION_PORT;
-const API_URL = process.env.API_URL;
 
 app.use(express.static("public")); //allows us save static files in the public folder
 
-app.use(bodyParser.urlencoded({ extended: true })); //Necessary to parse other formats of data as urlencoded data
+app.use(express.urlencoded({ extended: true })); //Necessary to parse other formats of data as urlencoded data
 
 // Route to render the main page
 app.get("/", async (req, res) => {
