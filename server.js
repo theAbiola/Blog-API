@@ -1,84 +1,111 @@
 import express from "express";
 import bodyParser from "body-parser";
-import axios from "axios";
 import env from "dotenv";
 
 const app = express();
 env.config();
-const port = process.env.APPLICATION_PORT;
-const API_URL = process.env.API_URL;
+const port = process.env.API_PORT;
 
-app.use(express.static("public")); //allows us save static files in the public folder
+// In-memory data store
+let posts = [
+  {
+    id: 1,
+    title: "The Rise of Decentralized Finance",
+    content:
+      "Decentralized Finance (DeFi) is an emerging and rapidly evolving field in the blockchain industry. It refers to the shift from traditional, centralized financial systems to peer-to-peer finance enabled by decentralized technologies built on Ethereum and other blockchains. With the promise of reduced dependency on the traditional banking sector, DeFi platforms offer a wide range of services, from lending and borrowing to insurance and trading.",
+    author: "Alex Thompson",
+    date: "2023-08-01T10:00:00Z",
+  },
+  {
+    id: 2,
+    title: "The Impact of Artificial Intelligence on Modern Businesses",
+    content:
+      "Artificial Intelligence (AI) is no longer a concept of the future. It's very much a part of our present, reshaping industries and enhancing the capabilities of existing systems. From automating routine tasks to offering intelligent insights, AI is proving to be a boon for businesses. With advancements in machine learning and deep learning, businesses can now address previously insurmountable problems and tap into new opportunities.",
+    author: "Mia Williams",
+    date: "2023-08-05T14:30:00Z",
+  },
+  {
+    id: 3,
+    title: "Sustainable Living: Tips for an Eco-Friendly Lifestyle",
+    content:
+      "Sustainability is more than just a buzzword; it's a way of life. As the effects of climate change become more pronounced, there's a growing realization about the need to live sustainably. From reducing waste and conserving energy to supporting eco-friendly products, there are numerous ways we can make our daily lives more environmentally friendly. This post will explore practical tips and habits that can make a significant difference.",
+    author: "Samuel Green",
+    date: "2023-08-10T09:15:00Z",
+  },
+  {
+    id: 4,
+    title: "The importance of consistency",
+    content:
+      "Consistency is what keeps you focused so that you can always do what you say you would do. Consistency is what helps you stay on track and always finish what you started.",
+    author: "Habib Abiola",
+    date: "2025-01-22T17:33:41.660Z",
+  },
+];
 
-app.use(bodyParser.urlencoded({ extended: true })); //Necessary to parse other formats of data as urlencoded data
+let lastId = 3;
 
-// Route to render the main page
-app.get("/", async (req, res) => {
-  try {
-    const response = await axios.get(`${API_URL}/posts`);
-    console.log(response);
-    res.render("index.ejs", { posts: response.data });
-  } catch (error) {
-    res.status(500).json({ message: "Error fetching posts" });
-  }
+// Middleware
+app.use(bodyParser.json()); //Necessary to parse incoming JSON response
+app.use(bodyParser.urlencoded({ extended: true }));
+
+//ENDPOINT 1: GET All posts
+app.get("/posts", (req, res) => {
+  res.json(posts);
 });
 
-// Route to render the new post page
-app.get("/new", (req, res) => {
-  res.render("modify.ejs", { heading: "New Post", submit: "Create Post" });
+//ENDPOINT 2: GET a specific post by id
+app.get("/posts/:id", (req, res) => {
+  let postId = parseInt(req.params.id);
+  let foundPost = posts.find((post) => post.id === postId);
+  res.json(foundPost);
 });
 
-// Route to render the edit page
-app.get("/edit/:id", async (req, res) => {
-  try {
-    const response = await axios.get(`${API_URL}/posts/${req.params.id}`); //this req.params.id is coming from the ejs side. It is the endpoint that the user hits up from the form.
-    console.log(response.data);
-    res.render("modify.ejs", {
-      heading: "Edit Post",
-      submit: "Update Post",
-      post: response.data,
-    });
-  } catch (error) {
-    res.status(500).json({ message: "Error fetching post" });
-  }
+//ENDPOINT 3: POST a new post
+app.post("/posts", (req, res) => {
+  let { title, content, author } = req.body;
+  let newId = lastId + 1;
+  let newPost = {
+    id: newId,
+    title: title,
+    content: content,
+    author: author,
+    date: new Date(),
+  };
+  lastId = newId;
+  posts.push(newPost);
+  res.status(201).json(newPost);
 });
 
-// Create a new post
-app.post("/api/posts", async (req, res) => {
-  try {
-    const response = await axios.post(`${API_URL}/posts`, req.body);
-    console.log(response.data);
-    res.redirect("/");
-  } catch (error) {
-    res.status(500).json({ message: "Error creating post" });
-  }
+//ENDPOINT 4: PATCH a post when you just want to update one parameter
+app.patch("/posts/:id", (req, res) => {
+  let { title, content, author } = req.body;
+  let postId = parseInt(req.params.id);
+  let foundPost = posts.find((post) => post.id === postId);
+  let newPost = {
+    id: postId,
+    title: title || foundPost.title,
+    content: content || foundPost.content,
+    author: author || foundPost.author,
+    date: new Date() || foundPost.date,
+  };
+
+  let postIndex = posts.findIndex((post) => post.id === postId);
+  posts[postIndex] = newPost;
+
+  res.json(newPost);
 });
 
-// Partially update a post
-app.post("/api/posts/:id", async (req, res) => {
-  console.log("called");
-  try {
-    const response = await axios.patch(
-      `${API_URL}/posts/${req.params.id}`,
-      req.body
-    );
-    console.log(response.data);
-    res.redirect("/");
-  } catch (error) {
-    res.status(500).json({ message: "Error updating post" });
+//ENDPOINT 5: DELETE a specific post by providing the post id.
+app.delete("/posts/:id", (req, res) => {
+  let postId = parseInt(req.params.id);
+  let foundPostIndex = posts.findIndex((post) => post.id === postId);
+  if (foundPostIndex > -1) {
+    posts.splice(foundPostIndex, 1);
   }
-});
 
-// Delete a post
-app.get("/api/posts/delete/:id", async (req, res) => {
-  try {
-    await axios.delete(`${API_URL}/posts/${req.params.id}`);
-    res.redirect("/");
-  } catch (error) {
-    res.status(500).json({ message: "Error deleting post" });
-  }
+  res.sendStatus(200);
 });
 
 app.listen(port, () => {
-  console.log(`Backend server is running on http://localhost:${port}`);
+  console.log(`API is running at http://localhost:${port}`);
 });
