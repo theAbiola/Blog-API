@@ -45,8 +45,8 @@ let posts = [
 let lastId = 3;
 
 // Middleware
-app.use(bodyParser.json()); //Necessary to parse incoming JSON response
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.json()); //Necessary to parse incoming JSON response
+app.use(express.urlencoded({ extended: true }));
 
 //ENDPOINT 1: GET All posts
 app.get("/posts", (req, res) => {
