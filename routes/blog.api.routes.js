@@ -5,7 +5,7 @@ import {
     postNewPost,
     patchPost,
     deletePost
-} from '../controllers/blogController.js';
+} from '../controllers/blog.api.controller.js';
 
 const router = express.Router();
 

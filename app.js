@@ -1,6 +1,6 @@
 import express from "express";
 import env from "dotenv";
-import routes from "./routes/blogAppRoutes.js";
+import routes from "./routes/blog.app.routes.js";
 
 const app = express();
 env.config();
