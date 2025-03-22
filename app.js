@@ -11,7 +11,7 @@ app.use(express.static("public")); //allows us save static files in the public f
 
 app.use(express.urlencoded({ extended: true })); //Necessary to parse other formats of data as urlencoded data
 
-app.use(routes);
+app.use(routes); //middleware for homeroute
 
 app.listen(port, () => {
   console.log(`Application is running on http://localhost:${port}`);
