@@ -8,7 +8,7 @@ const port = process.env.SERVER_PORT;
 
 // Middleware
 app.use(express.json()); //Necessary to parse incoming JSON response
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true })); //middleware to parse url data
 
 app.use(routes);
 
